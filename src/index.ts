@@ -18,19 +18,23 @@ app.get("/health", (_req, res) => {
 app.post("/webhook/zalo", async (req, res) => {
   const expectedSecret = process.env.ZALO_WEBHOOK_SECRET;
   if (expectedSecret && req.header("X-Bot-Api-Secret-Token") !== expectedSecret) {
+    console.warn("[zalo:webhook] Rejected: webhook secret mismatch.");
     res.status(401).json({ ok: false });
     return;
   }
 
   const message = normalizeZaloMessage(req.body);
   if (!message) {
+    console.info("[zalo:webhook] Ignored: no supported text message.");
     res.json({ ok: true, ignored: true });
     return;
   }
 
   try {
+    console.info(`[zalo:webhook] Received text message (${message.chat.type}).`);
     const reply = await handleMessage(storage, message);
     await sendZaloMessage(message.chat.id, reply);
+    console.info("[zalo:webhook] Reply accepted by Zalo.");
     res.json({ ok: true });
   } catch (error) {
     console.error(error);

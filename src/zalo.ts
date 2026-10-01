@@ -23,8 +23,7 @@ export function normalizeZaloMessage(body: unknown): ZaloIncomingMessage | null 
 export async function sendZaloMessage(chatId: string, text: string): Promise<void> {
   const token = process.env.ZALO_BOT_TOKEN;
   if (!token) {
-    console.log(`[zalo:dry-run] ${chatId}: ${text}`);
-    return;
+    throw new Error("ZALO_BOT_TOKEN is missing; cannot send a reply.");
   }
 
   const response = await fetch(`https://bot-api.zaloplatforms.com/bot${token}/sendMessage`, {
@@ -33,8 +32,8 @@ export async function sendZaloMessage(chatId: string, text: string): Promise<voi
     body: JSON.stringify({ chat_id: chatId, text })
   });
 
-  if (!response.ok) {
-    const body = await response.text();
-    throw new Error(`Zalo sendMessage failed: ${response.status} ${body}`);
+  const body = await response.json() as { ok?: boolean; error_code?: number; description?: string };
+  if (!response.ok || body.ok !== true) {
+    throw new Error(`Zalo sendMessage failed: HTTP ${response.status}, code ${body.error_code ?? "unknown"}: ${body.description ?? "API did not confirm success"}`);
   }
 }

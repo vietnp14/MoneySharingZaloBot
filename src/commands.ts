@@ -48,7 +48,8 @@ const COMMAND_ALIASES: Record<string, string> = {
 };
 
 export function parseCommand(text: string): ParsedCommand {
-  const parts = text.trim().split(/\s+/);
+  const commandText = text.trim().replace(/^@[^\r\n]*?\s+(?=\/[a-z]+(?:\s|$))/i, "");
+  const parts = commandText.split(/\s+/);
   const rawCommand = parts[0]?.toLowerCase();
   const command = COMMAND_ALIASES[rawCommand];
 
@@ -60,7 +61,7 @@ export function parseCommand(text: string): ParsedCommand {
   if (command === "month") return { kind: "month" };
 
   if (command === "ask") {
-    const question = text.slice(parts[0].length).trim();
+    const question = commandText.slice(parts[0].length).trim();
     return question ? { kind: "ask", question } : { kind: "unknown", reason: "Usage: /ask <question>" };
   }
 
