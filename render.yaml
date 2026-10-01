@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: money-sharing-zalo-bot
+    runtime: node
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_VERSION
+        value: 22
+      - key: STORAGE_DRIVER
+        value: firestore
+      - key: OPENAI_MODEL
+        value: gpt-6-luna
