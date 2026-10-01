@@ -15,7 +15,7 @@ export function startOfMonth(date = new Date()): Date {
 
 export function summarizeExpenses(title: string, expenses: Expense[]): string {
   const active = expenses.filter((expense) => !expense.deletedAt);
-  if (active.length === 0) return `${title}\nNo spending recorded.`;
+  if (active.length === 0) return `${title}\nChưa có khoản chi nào.`;
 
   const total = active.reduce((sum, expense) => sum + expense.amountVnd, 0);
   const byPayer = new Map<string, { name: string; total: number }>();
@@ -31,5 +31,5 @@ export function summarizeExpenses(title: string, expenses: Expense[]): string {
     .map((item) => `- ${item.name}: ${formatMoneyVnd(item.total)}`)
     .join("\n");
 
-  return `${title}\nTotal: ${formatMoneyVnd(total)}\nExpenses: ${active.length}\nPaid by:\n${payerLines}`;
+  return `${title}\nTổng chi: ${formatMoneyVnd(total)}\nSố khoản chi: ${active.length}\nNgười trả tiền:\n${payerLines}`;
 }

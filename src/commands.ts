@@ -25,35 +25,24 @@ export type ParsedCommand =
   | { kind: "unknown"; reason: string };
 
 const COMMAND_ALIASES: Record<string, string> = {
-  "/spend": "spend",
-  "/pay": "spend",
   "/chi": "spend",
-  "/edit": "edit",
   "/sua": "edit",
-  "/delete": "delete",
-  "/del": "delete",
   "/xoa": "delete",
-  "/debt": "debt",
   "/no": "debt",
-  "/week": "week",
   "/tuan": "week",
-  "/month": "month",
   "/thang": "month",
-  "/settle": "settle",
-  "/clear": "settle",
   "/tra": "settle",
-  "/ask": "ask",
-  "/help": "help",
+  "/hoi": "ask",
   "/trogiup": "help"
 };
 
 export function parseCommand(text: string): ParsedCommand {
-  const commandText = text.trim().replace(/^@[^\r\n]*?\s+(?=\/[a-z]+(?:\s|$))/i, "");
+  const commandText = text.trim().replace(/^@[^\r\n]*?\s+(?=\/[\p{L}\p{M}]+(?:\s|$))/iu, "");
   const parts = commandText.split(/\s+/);
-  const rawCommand = parts[0]?.toLowerCase();
+  const rawCommand = parts[0]?.toLowerCase().normalize("NFD").replace(/\p{M}/gu, "");
   const command = COMMAND_ALIASES[rawCommand];
 
-  if (!command) return { kind: "unknown", reason: "Unknown command. Send /help to see examples." };
+  if (!command) return { kind: "unknown", reason: "Lệnh không hợp lệ. Gửi /trợgiúp để xem hướng dẫn." };
 
   if (command === "help") return { kind: "help" };
   if (command === "debt") return { kind: "debt" };
@@ -62,13 +51,13 @@ export function parseCommand(text: string): ParsedCommand {
 
   if (command === "ask") {
     const question = commandText.slice(parts[0].length).trim();
-    return question ? { kind: "ask", question } : { kind: "unknown", reason: "Usage: /ask <question>" };
+    return question ? { kind: "ask", question } : { kind: "unknown", reason: "Cú pháp: /hỏi <câu hỏi>" };
   }
 
   if (command === "delete") {
     const sequence = Number(parts[1]);
     if (!Number.isInteger(sequence) || sequence <= 0) {
-      return { kind: "unknown", reason: "Usage: /delete <expense_id>" };
+      return { kind: "unknown", reason: "Cú pháp: /xóa <mã khoản chi>" };
     }
     return { kind: "delete", sequence };
   }
@@ -77,14 +66,14 @@ export function parseCommand(text: string): ParsedCommand {
     const mention = parseMention(parts[1]);
     const amountVnd = parseMoneyVnd(parts[2] ?? "");
     if (!mention || !amountVnd) {
-      return { kind: "unknown", reason: "Usage: /settle @friend 100k" };
+      return { kind: "unknown", reason: "Cú pháp: /trả @An 100k" };
     }
     return { kind: "settle", to: mention, amountVnd };
   }
 
   if (command === "spend") {
     const amountVnd = parseMoneyVnd(parts[1] ?? "");
-    if (!amountVnd) return { kind: "unknown", reason: "Usage: /spend 300k breakfast @An @Binh" };
+    if (!amountVnd) return { kind: "unknown", reason: "Cú pháp: /chi 300k ăn sáng @An @Binh" };
     return parseExpensePayload(parts.slice(2), amountVnd);
   }
 
@@ -92,13 +81,13 @@ export function parseCommand(text: string): ParsedCommand {
     const sequence = Number(parts[1]);
     const amountVnd = parseMoneyVnd(parts[2] ?? "");
     if (!Number.isInteger(sequence) || sequence <= 0 || !amountVnd) {
-      return { kind: "unknown", reason: "Usage: /edit <expense_id> 300k breakfast @An @Binh" };
+      return { kind: "unknown", reason: "Cú pháp: /sửa <mã khoản chi> 300k ăn sáng @An @Binh" };
     }
     const parsed = parseExpensePayload(parts.slice(3), amountVnd);
     return parsed.kind === "spend" ? { ...parsed, kind: "edit", sequence } : parsed;
   }
 
-  return { kind: "unknown", reason: "Unknown command. Send /help to see examples." };
+  return { kind: "unknown", reason: "Lệnh không hợp lệ. Gửi /trợgiúp để xem hướng dẫn." };
 }
 
 function parseExpensePayload(tokens: string[], amountVnd: number): ParsedCommand {
@@ -106,7 +95,7 @@ function parseExpensePayload(tokens: string[], amountVnd: number): ParsedCommand
   const description = tokens.filter((token) => !parseMention(token)).join(" ").trim();
 
   if (!description || participants.length === 0) {
-    return { kind: "unknown", reason: "Usage: /spend 300k breakfast @An @Binh" };
+    return { kind: "unknown", reason: "Cú pháp: /chi 300k ăn sáng @An @Binh" };
   }
 
   return { kind: "spend", amountVnd, description, participants: uniqueUsers(participants) };

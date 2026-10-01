@@ -29,7 +29,7 @@ export async function handleMessage(storage: Storage, message: ZaloIncomingMessa
       createdAt: now,
       updatedAt: now
     });
-    return `Saved #${expense.sequence}: ${message.from.name} paid ${formatMoneyVnd(expense.amountVnd)} for ${expense.description}, split ${participants.length} ways.`;
+    return `Đã lưu #${expense.sequence}: ${message.from.name} trả ${formatMoneyVnd(expense.amountVnd)} cho ${expense.description}, chia đều ${participants.length} người.`;
   }
 
   if (parsed.kind === "edit") {
@@ -40,15 +40,15 @@ export async function handleMessage(storage: Storage, message: ZaloIncomingMessa
       description: parsed.description,
       participants
     });
-    if (!expense) return `Cannot edit #${parsed.sequence}. Only the original payer can edit their own expense.`;
-    return `Updated #${expense.sequence}: ${formatMoneyVnd(expense.amountVnd)} for ${expense.description}.`;
+    if (!expense) return `Không thể sửa #${parsed.sequence}. Khoản chi không tồn tại hoặc bạn không phải người tạo.`;
+    return `Đã sửa #${expense.sequence}: ${formatMoneyVnd(expense.amountVnd)} cho ${expense.description}.`;
   }
 
   if (parsed.kind === "delete") {
     const deleted = await storage.deleteExpense(groupId, parsed.sequence, message.from.id);
     return deleted
-      ? `Deleted #${parsed.sequence}.`
-      : `Cannot delete #${parsed.sequence}. Only the original payer can delete their own expense.`;
+      ? `Đã xóa #${parsed.sequence}.`
+      : `Không thể xóa #${parsed.sequence}. Khoản chi không tồn tại hoặc bạn không phải người tạo.`;
   }
 
   if (parsed.kind === "settle") {
@@ -60,7 +60,7 @@ export async function handleMessage(storage: Storage, message: ZaloIncomingMessa
       amountVnd: parsed.amountVnd,
       createdAt: now
     });
-    return `Saved settlement #${settlement.sequence}: ${message.from.name} paid ${parsed.to.name} ${formatMoneyVnd(parsed.amountVnd)}.`;
+    return `Đã ghi nhận trả nợ #${settlement.sequence}: ${message.from.name} trả ${parsed.to.name} ${formatMoneyVnd(parsed.amountVnd)}.`;
   }
 
   if (parsed.kind === "debt") {
@@ -69,32 +69,32 @@ export async function handleMessage(storage: Storage, message: ZaloIncomingMessa
 
   if (parsed.kind === "week") {
     const expenses = await storage.getExpensesSince(groupId, startOfWeek());
-    return summarizeExpenses("This week", expenses);
+    return summarizeExpenses("Tuần này", expenses);
   }
 
   if (parsed.kind === "month") {
     const expenses = await storage.getExpensesSince(groupId, startOfMonth());
-    return summarizeExpenses("This month", expenses);
+    return summarizeExpenses("Tháng này", expenses);
   }
 
   if (parsed.kind === "ask") {
     return answerAnalyticsQuestion(parsed.question, await storage.getLedger(groupId));
   }
 
-  return "I don't know.";
+  return "Tôi không biết.";
 }
 
 function helpText(): string {
   return [
-    "Commands:",
-    "/spend 300k breakfast @An @Binh",
-    "/chi 300k an sang @An @Binh",
-    "/debt or /no",
-    "/week or /tuan",
-    "/month or /thang",
-    "/edit 12 350k breakfast @An @Binh",
-    "/delete 12",
-    "/settle @An 100k",
-    "/ask how much did we spend on coffee this month?"
+    "Các lệnh:",
+    "/chi 300k ăn sáng @An @Binh",
+    "/nợ - xem nợ hiện tại",
+    "/tuần - chi tiêu tuần này",
+    "/tháng - chi tiêu tháng này",
+    "/sửa 12 350k ăn sáng @An @Binh",
+    "/xóa 12",
+    "/trả @An 100k",
+    "/hỏi Tháng này nhóm chi bao nhiêu tiền cà phê?",
+    "/trợgiúp - xem hướng dẫn"
   ].join("\n");
 }

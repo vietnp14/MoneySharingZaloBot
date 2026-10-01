@@ -1,35 +1,32 @@
-# Money Sharing Zalo Bot
+# Bot chia tiền trên Zalo
 
-Command-first Smart MVP for a closed Zalo group. The bot records shared expenses, keeps per-group history forever, calculates current debt, supports user-owned edit/delete, and can answer simple analytics questions through OpenAI.
+Bot ghi nhận chi tiêu chung, lưu lịch sử riêng cho từng cuộc trò chuyện, tính nợ và thống kê qua AI. Các lệnh và phản hồi dùng tiếng Việt. Lệnh có dấu và không dấu đều được hỗ trợ.
 
-## MVP Commands
+## Các lệnh
 
 ```text
-/spend 300k breakfast @An @Binh @Cuong
-/chi 300k an sang @An @Binh @Cuong
+/chi 300k ăn sáng @An @Binh @Cuong
 
-/debt
-/no
+/nợ
 
-/week
-/month
+/tuần
+/tháng
 
-/edit 12 350k breakfast @An @Binh @Cuong
-/sua 12 350k an sang @An @Binh @Cuong
+/sửa 12 350k ăn sáng @An @Binh @Cuong
 
-/delete 12
-/xoa 12
+/xóa 12
 
-/settle @Cuong 100k
-/tra @Cuong 100k
+/trả @Cuong 100k
 
-/help
-/ask how much did we spend this month on coffee?
+/trợgiúp
+/hỏi Tháng này nhóm chi bao nhiêu tiền cà phê?
 ```
 
-The payer is always the sender. Participants are the people mentioned in the command. If the sender is not listed, the bot automatically includes them.
+Người gửi lệnh chi là người trả tiền và luôn được tính vào danh sách chia đều. Chỉ người tạo được sửa hoặc xóa khoản chi của mình, bằng mã do bot trả về. `/trả` ghi nhận trả nợ, không thực hiện chuyển tiền.
 
-## Run Locally
+Có thể nhắc bot trước lệnh, ví dụ `@Bot Money Sharing /trợgiúp`. Các lệnh tiếng Anh đã được loại bỏ.
+
+## Chạy cục bộ
 
 ```bash
 npm install
@@ -37,16 +34,18 @@ cp .env.example .env
 npm run dev
 ```
 
-For local testing without Firebase, set:
+Để kiểm thử không dùng Firebase, đặt biến môi trường:
 
 ```text
 STORAGE_DRIVER=memory
 ```
 
-## Zalo Notes
+## Lưu ý về Zalo
 
-Zalo Bot supports webhook and long polling. For production, use webhook with an HTTPS URL. Zalo OA group messaging APIs require group-management permission, so group behavior must be validated with your actual bot/OA permissions before relying on it in production.
+Đăng ký webhook HTTPS tại `/webhook/zalo`, với khóa bí mật khớp `ZALO_WEBHOOK_SECRET`. Kiểm thử trong cuộc trò chuyện riêng trước; kiểm tra `can_join_groups` qua API `getMe` trước khi dùng nhóm.
 
-## Storage
+## Lưu trữ
 
-The default storage target is Firestore because it fits per-group history, edit/delete ownership checks, and settlement events better than Google Sheets. Google Sheets can be added later as an export or secondary adapter.
+Bot dùng Firestore. Cần bật API Cloud Firestore và tạo cơ sở dữ liệu `(default)` trong dự án tương ứng với thông tin xác thực.
+
+Hiện tại, tên như `@An` chưa được liên kết với ID Zalo thật. Khi nhiều người ghi chi tiêu, điều này có thể tạo người trùng và làm sai số dư; cần hoàn thiện liên kết thành viên trước khi dùng cho nợ thực tế.

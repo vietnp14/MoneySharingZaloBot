@@ -59,10 +59,10 @@ export function calculateDebtTransfers(ledger: Ledger): DebtTransfer[] {
 
 export function summarizeDebts(ledger: Ledger): string {
   const transfers = calculateDebtTransfers(ledger);
-  if (transfers.length === 0) return "No current debt. Everyone is balanced.";
+  if (transfers.length === 0) return "Hiện không có nợ. Mọi người đã thanh toán đủ.";
 
   return transfers
-    .map((transfer) => `${transfer.from.name} owes ${transfer.to.name}: ${formatMoneyVnd(transfer.amountVnd)}`)
+    .map((transfer) => `${transfer.from.name} nợ ${transfer.to.name}: ${formatMoneyVnd(transfer.amountVnd)}`)
     .join("\n");
 }
 

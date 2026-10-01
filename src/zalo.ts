@@ -15,7 +15,7 @@ export function normalizeZaloMessage(body: unknown): ZaloIncomingMessage | null 
     },
     from: {
       id: String(message.from?.id ?? message.from_id ?? value.sender?.id ?? "unknown"),
-      name: String(message.from?.display_name ?? message.from?.name ?? "Unknown")
+      name: String(message.from?.display_name ?? message.from?.name ?? "Không rõ tên")
     }
   };
 }

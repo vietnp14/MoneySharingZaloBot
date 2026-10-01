@@ -9,11 +9,11 @@ afterEach(() => {
 describe("Zalo messaging", () => {
   it("parses the documented webhook envelope", () => {
     expect(normalizeZaloMessage({ ok: true, result: { message: {
-      text: "/help",
+      text: "/trogiup",
       from: { id: "user-1", display_name: "An" },
       chat: { id: "group-1", chat_type: "GROUP" }
     } } })).toMatchObject({
-      text: "/help", from: { id: "user-1", name: "An" },
+      text: "/trogiup", from: { id: "user-1", name: "An" },
       chat: { id: "group-1", type: "GROUP" }
     });
   });

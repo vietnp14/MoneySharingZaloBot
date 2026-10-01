@@ -2,7 +2,7 @@ import OpenAI from "openai";
 import type { Ledger } from "./types.js";
 
 export async function answerAnalyticsQuestion(question: string, ledger: Ledger): Promise<string> {
-  if (!process.env.OPENAI_API_KEY) return "I don't know. OpenAI API key is not configured.";
+  if (!process.env.OPENAI_API_KEY) return "Chưa cấu hình khóa API cho trợ lý AI.";
 
   const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
   const model = process.env.OPENAI_MODEL ?? "gpt-6-luna";
@@ -37,14 +37,14 @@ export async function answerAnalyticsQuestion(question: string, ledger: Ledger):
       {
         role: "system",
         content:
-          "You answer analytics questions about a shared expense ledger. Keep answers short. If the ledger does not contain enough information, say \"I don't know.\" Amounts are VND."
+          "Bạn trả lời câu hỏi thống kê về sổ chi tiêu chung. Luôn trả lời bằng tiếng Việt, ngắn gọn. Nếu dữ liệu không đủ, hãy nói: 'Tôi không biết.' Đơn vị tiền là VND."
       },
       {
         role: "user",
-        content: `Question: ${question}\nLedger JSON: ${JSON.stringify(compactLedger)}`
+        content: `Câu hỏi: ${question}\nDữ liệu chi tiêu JSON: ${JSON.stringify(compactLedger)}`
       }
     ]
   });
 
-  return response.output_text.trim() || "I don't know.";
+  return response.output_text.trim() || "Tôi không biết.";
 }
